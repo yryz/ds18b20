@@ -16,7 +16,12 @@ func Sensors() ([]string, error) {
 		return nil, err
 	}
 
-	return strings.Split(string(data), "\n"), nil
+	sensors := strings.Split(string(data), "\n")
+	if len(sensors) > 0 {
+		sensors = sensors[:len(sensors)-1]
+	}
+
+	return sensors, nil
 }
 
 // Temperature get the temperature of a given sensor
