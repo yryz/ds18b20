@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var ErrReadSensor = errors.New("failed to read sensor temperature")
+
 // Sensors get all connected sensor IDs as array
 func Sensors() ([]string, error) {
 	data, err := ioutil.ReadFile("/sys/bus/w1/devices/w1_bus_master1/w1_master_slaves")
@@ -28,28 +30,20 @@ func Sensors() ([]string, error) {
 func Temperature(sensor string) (float64, error) {
 	data, err := ioutil.ReadFile("/sys/bus/w1/devices/" + sensor + "/w1_slave")
 	if err != nil {
-		return 0.0, nil
+		return 0.0, ErrReadSensor
 	}
 
-	if strings.Contains(string(data), "YES") {
-		arr := strings.SplitN(string(data), " ", 3)
+	raw := string(data)
 
-		switch arr[1][0] {
-		case 'f': //-0.5 ~ -55°C
-			x, err := strconv.ParseInt(arr[1]+arr[0], 16, 32)
-			if err != nil {
-				return 0.0, err
-			}
-			return float64(^x+1) * 0.0625, nil
-
-		case '0': //0~125°C
-			x, err := strconv.ParseInt(arr[1]+arr[0], 16, 32)
-			if err != nil {
-				return 0.0, err
-			}
-			return float64(x) * 0.0625, nil
-		}
+	i := strings.LastIndex(raw, "t=")
+	if i == -1 {
+		return 0.0, ErrReadSensor
 	}
 
-	return 0.0, errors.New("can not read temperature for sensor " + sensor)
+	c, err := strconv.ParseFloat(raw[i+2:len(raw)-1], 64)
+	if err != nil {
+		return 0.0, ErrReadSensor
+	}
+
+	return c / 1000.0, nil
 }
