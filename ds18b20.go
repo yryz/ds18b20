@@ -35,6 +35,10 @@ func Temperature(sensor string) (float64, error) {
 
 	raw := string(data)
 
+	if !strings.Contains(raw, " YES") {
+		return 0.0, ErrReadSensor
+	}
+
 	i := strings.LastIndex(raw, "t=")
 	if i == -1 {
 		return 0.0, ErrReadSensor
