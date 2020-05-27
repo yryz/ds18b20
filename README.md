@@ -2,6 +2,10 @@
 
 Get sensor data from ds18b20 connected to the Raspberry (GPIO w1 pin).
 
+
+
+![](https://raw.githubusercontent.com/yryz/ds18b20/master/pi-ds18b20.png)
+
 ## Usage
 
 ### Connect DS18B20
